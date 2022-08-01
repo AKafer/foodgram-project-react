@@ -150,5 +150,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+DJOSER = {
+    'LOGIN_FIELD': 'email'
+}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
