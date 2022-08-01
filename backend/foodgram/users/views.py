@@ -1,9 +1,10 @@
 from rest_framework import  status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, authentication_classes
 from django.shortcuts import get_object_or_404
 from .serializers import UserSerializer, TokenGeneratorSerialiser, UserMeSerializer
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import User
 
@@ -13,6 +14,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     @action(detail=False, methods=['get'], url_path='me')
+    @authentication_classes([JWTAuthentication])
     def mi_signin(self, request):
         username =request.user
         me = get_object_or_404(User, username=username)

@@ -1,11 +1,11 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
 from users.views import UserViewSet, TokenClass
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='users')
-router.register(r'auth', TokenClass, basename='auth')
+
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include('djoser.urls')),
+    re_path(r'^auth/', include('djoser.urls.authtoken')),
 ]
