@@ -1,8 +1,10 @@
 from io import BytesIO
 import base64
 from PIL import Image
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from .models import Ingredient, Recipe, Tag
+
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -18,7 +20,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
-
+"""
 class ImageConversion(serializers.Field):
     def to_representation(self, value):
         return value
@@ -32,12 +34,15 @@ class ImageConversion(serializers.Field):
                 'Не вышло декодировать картинку'
             )
         return image
+"""
+
 
 class RecipeSerializer(serializers.ModelSerializer):
-    image = ImageConversion()
+    #image = Base64ImageField()
 
     class Meta:
         model = Recipe
         fields = ('id', 'author', 'name', 'image', 'text', 'ingredients',
                  'tags', 'cooking_time')
+        read_only_fields = ('author',)
 

@@ -1,10 +1,8 @@
 from django.contrib import admin
 
-from .models import Tag
+from .models import Tag, Ingredient, Recipe
 
 
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('id','name', 'color', 'slug')
-    empty_value_display = '-пусто-'
-
-admin.site.register(Tag, TagAdmin)
+admin.site.register(Tag)
+admin.site.register(Ingredient)
+admin.site.register(Recipe)

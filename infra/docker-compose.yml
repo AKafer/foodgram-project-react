@@ -6,11 +6,13 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     environment:
-        POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: postgres
 
   web:
     build: ../backend
     restart: always
+    ports:
+      - "8000:8000"
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
@@ -23,6 +25,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
+
   nginx:
     image: nginx:1.19.3
     ports:

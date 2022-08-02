@@ -37,7 +37,7 @@ class Recipe(models.Model):
         through='Ingredient_to_Recipe',
     )
     name = models.CharField('Название', max_length=256, unique=True)
-    image = models.ImageField('Картинка', upload_to='api/images/recipes/')
+    image = models.ImageField('Картинка', upload_to='recipe/')
     text = models.TextField('Описание')
     cooking_time = models.IntegerField('Время приготовления') 
     pub_date = models.DateTimeField(

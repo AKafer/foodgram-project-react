@@ -16,7 +16,10 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    "Класс представления ингридиентов"
+    "Класс представления рецептов"
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user) 
