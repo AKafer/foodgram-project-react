@@ -151,14 +151,12 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-   #'LOGIN_FIELD': 'email',
    'SERIALIZERS': {
         'user': 'users.serializers.MyUserSerializer',
         'current_user': 'users.serializers.MyUserSerializer',
         'user_create': 'users.serializers.MyUserCreateSerializer',
         'token_create': 'users.serializers.MyTokenCreateSerializer'
    }
-
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
