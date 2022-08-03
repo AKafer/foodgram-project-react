@@ -7,15 +7,6 @@ from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Класс сериализатора пользователей для админа."""
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'password'
-        )
-
 
 class MyUserSerializer(serializers.ModelSerializer):
     """Класс сериализатора пользователей для админа."""
@@ -31,13 +22,14 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username', 'first_name',
-            'last_name'
+            'email', 'username', 'first_name',
+            'last_name', 'password'
         )
 
 class MyTokenCreateSerializer(serializers.Serializer):
     password = serializers.CharField(required=False, style={"input_type": "password"})
 
+    
     default_error_messages = {
         "invalid_credentials": settings.CONSTANTS.messages.INVALID_CREDENTIALS_ERROR,
         "inactive_account": settings.CONSTANTS.messages.INACTIVE_ACCOUNT_ERROR,
@@ -53,13 +45,12 @@ class MyTokenCreateSerializer(serializers.Serializer):
     def validate(self, attrs):
         password = attrs.get("password")
         email = attrs.get("email")
-        self.user = authenticate(
-            request=self.context.get("request"), email=email, password=password
-        )
+        self.user = User.objects.filter(email=email, password=password).first()
         if not self.user:
             self.user = User.objects.filter(email=email).first()
             if self.user and not self.user.check_password(password):
                 self.fail("invalid_credentials")
         if self.user and self.user.is_active:
             return attrs
-        self.fail("invalid_credentials")
+        self.fail("inactive_account")
+    

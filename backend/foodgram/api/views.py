@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import filters, status, viewsets
 from .pagination import CustomPagination
 from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
-from .models import Ingredient, Recipe, Tag
+from .models import Ingredient, Ingredient_to_Recipe, Recipe, Tag
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -14,6 +14,13 @@ class IngredientViewSet(viewsets.ModelViewSet):
     "Класс представления ингридиентов"
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+
+"""
+class Ingredient_to_RecipeViewSet(viewsets.ModelViewSet):
+    "Класс представления ингридиентов"
+    queryset =Ingredient_to_Recipe.objects.all()
+    serializer_class = Ingredient_to_RecipeSerializer
+"""
 
 class RecipeViewSet(viewsets.ModelViewSet):
     "Класс представления рецептов"
