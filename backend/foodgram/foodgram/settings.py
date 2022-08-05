@@ -86,7 +86,6 @@ DATABASES = {
     }
 }
 """
-
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
@@ -151,6 +150,7 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+   "LOGIN_FIELD": "email",
    'SERIALIZERS': {
         'user': 'users.serializers.MyUserSerializer',
         'current_user': 'users.serializers.MyUserSerializer',

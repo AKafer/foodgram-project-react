@@ -37,9 +37,6 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
         print('ЗАПРОС', self)
 
         ing_to = get_object_or_404(Ingredient_to_Recipe, ingredient=obj)
-
-
-
         return ing_to.amount
     
 
@@ -48,7 +45,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = MyUserSerializer(read_only=True)
     #author = serializers.SlugRelatedField(quiryset=User.objects.all(), slug_field='recipes')
     #author = serializers.PrimaryKeyRelatedField(read_only=True)
-    ingredients = IngredientRecipeSerializer(many=True)
+    ingredients = IngredientSerializer(many=True, read_only=True)
     #ingredients = serializers.SerializerMethodField()
     #ingredients = serializers.SlugRelatedField(quiryset=Ingredient_to_Recipe.objects.all(), slug_field='ing')
     tags = TagSerializer(many=True, read_only=True)
@@ -65,7 +62,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         print('КОНЕЦ ДАННЫХ')
         tag_list = self.initial_data.pop('tags')
         ing_list = self.initial_data.pop('ingredients')
-        validated_data.pop('ingredients')
         #validated_data.pop('ingredients')
         print(tag_list)
         print(ing_list)
@@ -78,15 +74,16 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         print('Я ЗДЕСЬ')
         for ing in ing_list:
+            #cur_ing = get_object_or_404(Ingredient, pk=ing['id'])
+
+            #recipe.ingredients.add(cur_ing)
+
             cur_ing = get_object_or_404(Ingredient, pk=ing['id'])
-
-            recipe.ingredients.add(cur_ing)
-
-            """cur_ing = get_object_or_404(Ingredient, pk=ing['id'])
             Ingredient_to_Recipe.objects.create(
                 ingredient=cur_ing,
+                recipe=recipe,
                 amount=ing['amount']
-            )"""
+            )
 
         print("ТУТ ЗАКОНЧИЛИ")
         return recipe
@@ -110,17 +107,3 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ('user', 'author')
-
-        """ validators = [
-            UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'author'),
-                message='Подписка уже существует!',
-            )
-        ]
-
-    def validate_author(self, value):
-        if self.context['request'].user == value:
-            raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя!')
-        return value"""
