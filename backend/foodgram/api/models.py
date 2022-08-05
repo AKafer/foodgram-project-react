@@ -86,3 +86,18 @@ class Ingredient_to_Recipe(models.Model):
     
     def __str__(self):
         return f'{self.ingredient}-->{self.recipe}'
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+    )
+
+    def __str__(self):
+        return f'{self.user}-->{self.author}'

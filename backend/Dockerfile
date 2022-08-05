@@ -4,7 +4,11 @@ WORKDIR /app
 
 COPY requirements.txt /app
 
-RUN pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt --no-cache-dir
+RUN python -m pip install --upgrade pip
+
+RUN pip install ez_setup
+
+RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY foodgram/ /app
 
