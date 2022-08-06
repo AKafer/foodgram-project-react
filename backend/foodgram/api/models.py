@@ -15,7 +15,7 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     "Модель ингридиентов"
     name = models.CharField('Название', max_length=256, unique=True)
-    measurement_unit =models.CharField('Единица измерения', max_length=50) 
+    measurement_unit =models.CharField('Единица измерения', max_length=50)
     
     def __str__(self):
         return f'{self.name}'
@@ -32,11 +32,6 @@ class Recipe(models.Model):
         Tag,
         through='Tag_to_Recipe',
         related_name='tag_recipe',
-    )
-    ingredients = models.ManyToManyField(
-        Ingredient,
-        through='Ingredient_to_Recipe',
-        related_name='ing_recipe'
     )
     name = models.CharField('Название', max_length=256, unique=True)
     image = models.ImageField('Картинка', upload_to='recipe/')
@@ -55,6 +50,22 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
         ordering = ['-pub_date',]
 
+
+class IngredientAmount(models.Model):
+    "Модель ингридиентов"
+    name = models.CharField('Название', max_length=256)
+    measurement_unit =models.CharField('Единица измерения', max_length=50)
+    amount = models.IntegerField('Количество')
+    recipe =  models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name = 'ingredients'
+    )
+    
+    def __str__(self):
+        return f'{self.name}'
+
+
 class Tag_to_Recipe(models.Model):
     "Модель связи тэгов и рецепта"
     tag = models.ForeignKey(
@@ -70,22 +81,6 @@ class Tag_to_Recipe(models.Model):
     def __str__(self):
         return f'{self.tag}-->{self.recipe}'
 
-
-class Ingredient_to_Recipe(models.Model):
-    "Модель связи ингридиентов и рецепта"
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='ings_ref'
-    )
-    amount = models.IntegerField('Количество') 
-    
-    def __str__(self):
-        return f'{self.ingredient}-->{self.recipe}'
 
 class Follow(models.Model):
     user = models.ForeignKey(

@@ -12,6 +12,16 @@ from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
 
 
+class MyUserCreateSerializer(serializers.ModelSerializer):
+    """Класс сериализатора пользователей для админа."""
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'email', 'username', 'first_name',
+            'last_name', 'password'
+        )
 
 
 class MyUserSerializer(serializers.ModelSerializer):
@@ -26,7 +36,10 @@ class MyUserSerializer(serializers.ModelSerializer):
         )
     
     def get_is_subscribed(self, obj):
-        user_username = self.context['view'].request.user
+        try:
+            user_username = self.context['view'].request.user
+        except:
+            return False
         if obj.username == user_username:
             return False
         user = get_object_or_404(User, username=user_username)

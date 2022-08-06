@@ -57,6 +57,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'foodgram.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -78,7 +79,7 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -96,7 +97,7 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', default='')
     }
 }
-"""
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -150,16 +151,12 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
-   "LOGIN_FIELD": "email",
-   'SERIALIZERS': {
+    'SERIALIZERS': {
         'user': 'users.serializers.MyUserSerializer',
         'current_user': 'users.serializers.MyUserSerializer',
         'user_create': 'users.serializers.MyUserCreateSerializer',
         'token_create': 'users.serializers.MyTokenCreateSerializer',
-   },
-   'PERMISSIONS': {
-    'token_create': ['rest_framework.permissions.AllowAny']
-   }
+    },
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
