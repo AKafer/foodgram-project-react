@@ -38,27 +38,31 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(author_serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_200_OK)
     
-    
-    @action(methods=['get'], detail=False, url_path='subscriptions')
-    def get_subsribtions(self, request, id=None):
+
+class SubscriptionViewSet(mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
+    pagination_class = CustomPagination
+    serializer_class = MyUserSubsSerializer
+
+    def get_queryset(self):
         user = get_object_or_404(User, username=self.request.user)
         subscribes = Follow.objects.filter(user=user).values('author')
         authors = User.objects.filter(pk__in=subscribes)
-        serializer = MyUserSubsSerializer(authors, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return authors  
 
 
 class UserFollowViewSet(mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
-    "Класс представления подписок юзера"
+    "Класс удаление подписок"
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
 
     @action(methods=['delete'], detail=False)
     def delete(self, request, **kwargs):
         user = request.user
-        author = get_object_or_404(User, pk=id)
-        follow = Follow.objects.filter(user=user, author=author).first()
+        author_id = self.kwargs.get('id')
+        author = get_object_or_404(User, pk=author_id)
+        follow = get_object_or_404(Follow, user=user, author=author)
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     

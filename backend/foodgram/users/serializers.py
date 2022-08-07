@@ -69,8 +69,7 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
         if obj.username == user_username:
             return False
         user = get_object_or_404(User, username=user_username)
-        author = get_object_or_404(User, username=obj.username)
-        return Follow.objects.filter(user=user, author=author).exists()
+        return Follow.objects.filter(user=user, author=obj).exists()
     
     def get_recipes(self, obj):
         author = get_object_or_404(User, username=obj.username)
@@ -105,7 +104,6 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
 class MyTokenCreateSerializer(serializers.Serializer):
     password = serializers.CharField(required=False, style={"input_type": "password"})
 
-    
     default_error_messages = {
         "invalid_credentials": settings.CONSTANTS.messages.INVALID_CREDENTIALS_ERROR,
         "inactive_account": settings.CONSTANTS.messages.INACTIVE_ACCOUNT_ERROR,

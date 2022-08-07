@@ -35,11 +35,12 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = MyUserSerializer(read_only=True)
     ingredients = IngredientAmountSerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+    is_favorited = serializers.SerializerMethodField()
     
     class Meta:
         model = Recipe
         fields = ('id', 'author', 'name', 'image', 'text', 'ingredients',
-                 'tags', 'cooking_time')
+                 'tags', 'cooking_time', 'is_favorited')
         #read_only_fields = ('author',)
   
     def create(self, validated_data):
@@ -59,6 +60,12 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=ing['amount']  
             )
         return recipe
+
+    def get_is_favorited(self, obj):
+        user_username = self.context['view'].request.user
+        user = get_object_or_404(User, username=user_username)
+        return Favorite.objects.filter(user=user, recipe=obj).exists()
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Класс сериализатора тэгов."""
