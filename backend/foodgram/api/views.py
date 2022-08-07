@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from django_filters import rest_framework as dfilters
 from rest_framework import mixins, filters, status, viewsets
 from .pagination import CustomPagination
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,6 +10,7 @@ from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer, 
 from .models import Follow, Ingredient, Recipe, Tag, Favorite
 from users.models import User
 from .mixin import MyCreateDestroyClass
+from .filters import MyFilter
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -26,8 +28,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('tags',) 
+    filter_backends = (dfilters.DjangoFilterBackend,)
+    filterset_class = MyFilter
 
 
     def perform_create(self, serializer):

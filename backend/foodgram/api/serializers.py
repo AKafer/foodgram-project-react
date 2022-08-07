@@ -62,8 +62,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def get_is_favorited(self, obj):
-        user_username = self.context['view'].request.user
-        user = get_object_or_404(User, username=user_username)
+        try:
+            user_username = self.context['view'].request.user
+            user = get_object_or_404(User, username=user_username)
+        except:
+            return False
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
 

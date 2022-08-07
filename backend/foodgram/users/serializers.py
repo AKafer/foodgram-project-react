@@ -1,5 +1,6 @@
 from email.policy import default
 import base64
+from django.core import serializers as sz
 from rest_framework import serializers
 from drf_extra_fields.fields import Base64ImageField
 from .models import User 
@@ -38,11 +39,11 @@ class MyUserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         try:
             user_username = self.context['view'].request.user
+            user = get_object_or_404(User, username=user_username)
         except:
             return False
         if obj.username == user_username:
             return False
-        user = get_object_or_404(User, username=user_username)
         author = get_object_or_404(User, username=obj.username)
         return Follow.objects.filter(user=user, author=author).exists()
 
@@ -64,17 +65,18 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         try:
             user_username = self.context['view'].request.user
+            user = get_object_or_404(User, username=user_username)
         except:
             return True
         if obj.username == user_username:
             return False
-        user = get_object_or_404(User, username=user_username)
         return Follow.objects.filter(user=user, author=obj).exists()
     
     def get_recipes(self, obj):
         author = get_object_or_404(User, username=obj.username)
         recipes = Recipe.objects.filter(author=author)
-        list_rec = []   
+        #recipes =recipes.values('id', 'name', 'image', 'cooking_time')
+        list_rec = []
         for recipe in recipes:
             encoded_string = base64.b64encode(recipe.image.read())
             code_image = 'data:image/jpeg;base64,' + encoded_string.decode()
@@ -84,7 +86,7 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
                 "image": code_image,
                 "cooking_time": recipe.cooking_time
             })
-        return list_rec
+        return list_rec[0:3]
     
     def get_recipes_count(self, obj):
         author = get_object_or_404(User, username=obj.username)
