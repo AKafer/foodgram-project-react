@@ -6,7 +6,6 @@ from drf_extra_fields.fields import Base64ImageField
 from .models import User 
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
-#from api.serializers import RecipeSerializer
 from django.utils.translation import gettext_lazy as _
 from api.models import Follow, Recipe
 from djoser.compat import get_user_email_field_name
@@ -15,7 +14,6 @@ from djoser.conf import settings
 
 class MyUserCreateSerializer(serializers.ModelSerializer):
     """Класс сериализатора пользователей для админа."""
-    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -94,15 +92,6 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
         return number_recipes
 
    
-class MyUserCreateSerializer(serializers.ModelSerializer):
-    """Класс сериализатора пользователей для админа."""
-    class Meta:
-        model = User
-        fields = (
-            'email', 'username', 'first_name',
-            'last_name', 'password'
-        )
-
 class MyTokenCreateSerializer(serializers.Serializer):
     password = serializers.CharField(required=False, style={"input_type": "password"})
 
@@ -131,7 +120,7 @@ class MyTokenCreateSerializer(serializers.Serializer):
         self.fail("inactive_account")
 
 
-class FollowSerializer(serializers.ModelSerializer):
+"""class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         read_only=True, slug_field='username',
         default=serializers.CurrentUserDefault()
@@ -140,4 +129,4 @@ class FollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('user', 'author')
+        fields = ('user', 'author')"""
