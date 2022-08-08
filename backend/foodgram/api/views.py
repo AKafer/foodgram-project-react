@@ -12,7 +12,7 @@ from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
 from .models import Follow, Ingredient, Recipe, Tag, Favorite, ShoppingCart, IngredientAmount
 from users.models import User
 from .mixin import MyCreateDestroyClass
-from .filters import MyFilter
+from .filters import MyRecipeFilter, MyIngredientFilter
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -24,6 +24,9 @@ class IngredientViewSet(viewsets.ModelViewSet):
     "Класс представления ингридиентов"
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (dfilters.DjangoFilterBackend,)
+    filterset_class = MyIngredientFilter
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     "Класс представления рецептов"
@@ -31,7 +34,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
     filter_backends = (dfilters.DjangoFilterBackend,)
-    filterset_class = MyFilter
+    filterset_class = MyRecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
