@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Follow, Tag, Tag_to_Recipe, Ingredient, Recipe, Favorite
+from .models import Follow, Tag, Tag_to_Recipe, Ingredient, Recipe, Favorite, ShoppingCart
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
@@ -9,9 +9,11 @@ class RecipeAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(ShoppingCart)
 admin.site.register(Favorite)
 admin.site.register(Follow)
 admin.site.register(Tag)
 admin.site.register(Tag_to_Recipe)
 admin.site.register(Ingredient)
-admin.site.register(Recipe, RecipeAdmin)
+

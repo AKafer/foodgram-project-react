@@ -28,15 +28,19 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-    @action(methods=['post'], detail=False, url_path=r'(?P<id>\d+)/subscribe')
-    def create_subsribe(self, request, id=None):
+    @action(methods=['post', 'delete'], detail=False, url_path=r'(?P<id>\d+)/subscribe')
+    def subsribe_add_del(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, pk=id)
-        if user != author:
-            Follow.objects.get_or_create(user=user, author=author)
-            author_serializer = MyUserSubsSerializer(author)
-            return Response(author_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_200_OK)
+        if str(self.request.method) == 'POST':
+            if user != author:
+                Follow.objects.get_or_create(user=user, author=author)
+                author_serializer = MyUserSubsSerializer(author)
+                return Response(author_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_200_OK)
+        follow = get_object_or_404(Follow, user=user, author=author)
+        follow.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 class SubscriptionViewSet(mixins.ListModelMixin,
@@ -51,7 +55,7 @@ class SubscriptionViewSet(mixins.ListModelMixin,
         return authors  
 
 
-class UserFollowViewSet(mixins.DestroyModelMixin,
+"""class UserFollowViewSet(mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
     "Класс удаление подписок"
     queryset = Follow.objects.all()
@@ -64,7 +68,7 @@ class UserFollowViewSet(mixins.DestroyModelMixin,
         author = get_object_or_404(User, pk=author_id)
         follow = get_object_or_404(Follow, user=user, author=author)
         follow.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)"""
     
     
 
