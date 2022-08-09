@@ -1,18 +1,20 @@
-from django.shortcuts import render
 import base64
+
 from django.http import FileResponse, HttpResponse
-from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404, render
 from django_filters import rest_framework as dfilters
-from rest_framework import mixins, filters, status, viewsets
-from .pagination import CustomPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
-from .models import Follow, Ingredient, Recipe, Tag, Favorite, ShoppingCart, IngredientAmount
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from users.models import User
+
+from .filters import MyIngredientFilter, MyRecipeFilter
 from .mixin import MyCreateDestroyClass
-from .filters import MyRecipeFilter, MyIngredientFilter
+from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
+                     ShoppingCart, Tag)
+from .pagination import CustomPagination
+from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
 
 
 class TagViewSet(viewsets.ModelViewSet):

@@ -8,7 +8,8 @@ class UserAdmin(admin.ModelAdmin):
         'id', 'username', 'email', 'first_name',
         'last_name', 'password'
     )
+    list_display_links = ('id', 'username')
+    search_fields = ('username', 'email',)
     empty_value_display = '-пусто-'
-
 
 admin.site.register(User, UserAdmin)

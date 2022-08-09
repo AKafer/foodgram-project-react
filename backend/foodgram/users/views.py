@@ -1,14 +1,16 @@
 
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import mixins, status, viewsets
-from rest_framework.response import Response
-from api.pagination import CustomPagination
-from .serializers import MyUserSerializer, MyUserSubsSerializer, MyUserCreateSerializer
 from api.models import Follow
-from api.mixin import MyCreateDestroyClass
+from api.pagination import CustomPagination
+from django.shortcuts import get_object_or_404
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from users.models import User
+
+from .serializers import (MyUserCreateSerializer, MyUserSerializer,
+                          MyUserSubsSerializer)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     "Класс представления юзеров"
@@ -40,21 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
         follow = get_object_or_404(Follow, user=user, author=author)
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=['post', 'delete'], detail=False, url_path=r'(?P<id>\d+)/shopping_cart')
-    def shopping_cart_add_del(self, request, id=None):
-        user = request.user
-        author = get_object_or_404(User, pk=id)
-        if str(self.request.method) == 'POST':
-            if user != author:
-                Follow.objects.get_or_create(user=user, author=author)
-                author_serializer = MyUserSubsSerializer(author)
-                return Response(author_serializer.data, status=status.HTTP_201_CREATED)
-            return Response(status=status.HTTP_200_OK)
-        follow = get_object_or_404(Follow, user=user, author=author)
-        follow.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-    
+  
 
 class SubscriptionViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):

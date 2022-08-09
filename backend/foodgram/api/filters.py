@@ -1,8 +1,15 @@
-from django_filters import rest_framework as dfilters
 from django.shortcuts import get_object_or_404
-from django_filters.fields import CSVWidget
+from django_filters import rest_framework as dfilters
 
-from .models import Ingredient, Recipe, Favorite, User, ShoppingCart
+from .models import Favorite, Ingredient, Recipe, ShoppingCart, User
+
+
+class MyIngredientFilter(dfilters.FilterSet):
+    name = dfilters.CharFilter(field_name = "name", lookup_expr="istartswith")
+
+    class Meta:
+        model = Ingredient
+        fields = ('name', )
 
 
 class MyRecipeFilter(dfilters.FilterSet):
@@ -30,11 +37,3 @@ class MyRecipeFilter(dfilters.FilterSet):
     class Meta:
         model = Recipe
         fields = ('author', 'tags', )
-
-
-class MyIngredientFilter(dfilters.FilterSet):
-    name = dfilters.CharFilter(field_name = "name", lookup_expr="istartswith")
-
-    class Meta:
-        model = Ingredient
-        fields = ('name', )

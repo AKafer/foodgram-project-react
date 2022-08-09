@@ -1,15 +1,17 @@
-from email.policy import default
 import base64
-from django.core import serializers as sz
-from rest_framework import serializers
-from drf_extra_fields.fields import Base64ImageField
-from .models import User 
+from email.policy import default
+
+from api.models import Follow, Recipe
 from django.contrib.auth import authenticate
+from django.core import serializers as sz
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
-from api.models import Follow, Recipe
 from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
+from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
+from .models import User
 
 
 class MyUserCreateSerializer(serializers.ModelSerializer):
@@ -73,7 +75,6 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         author = get_object_or_404(User, username=obj.username)
         recipes = Recipe.objects.filter(author=author)
-        #recipes =recipes.values('id', 'name', 'image', 'cooking_time')
         list_rec = []
         for recipe in recipes:
             encoded_string = base64.b64encode(recipe.image.read())

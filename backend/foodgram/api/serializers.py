@@ -1,15 +1,17 @@
-from io import BytesIO
 import base64
+from io import BytesIO
+
 from django.shortcuts import get_object_or_404
 #from PIL import Image
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from .models import Follow, Ingredient, Recipe, ShoppingCart, Tag, Tag_to_Recipe, IngredientAmount, Favorite
 from rest_framework.validators import UniqueTogetherValidator
-
-
-from users.serializers import MyUserSerializer
 from users.models import User
+from users.serializers import MyUserSerializer
+
+from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
+                     ShoppingCart, Tag, Tag_to_Recipe)
+
 
 class TagSerializer(serializers.ModelSerializer):
     """Класс сериализатора тэгов."""
