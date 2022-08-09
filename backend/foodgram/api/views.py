@@ -22,6 +22,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
+
 class IngredientViewSet(viewsets.ModelViewSet):
     "Класс представления ингридиентов"
     queryset = Ingredient.objects.all()
@@ -100,10 +101,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for recipe in recipes:
             ing_amounts = IngredientAmount.objects.filter(recipe=recipe)
             for ing in ing_amounts:
-                if ing.name in shop_dict:
-                    shop_dict[ing.name][0] += ing.amount
+                if ing.ingredient.name in shop_dict:
+                    shop_dict[ing.ingredient][0] += ing.amount
                 else:
-                    shop_dict[ing.name] = [ing.amount, ing.measurement_unit]
+                    shop_dict[ing.ingredient.name] = [ing.amount, ing.ingredient.measurement_unit]
         shop_string ='Food_gram \nСписко покупок:'
         for key, value in shop_dict.items():
             shop_string += f'\n{key} ({value[1]}) - {str(value[0])}' 

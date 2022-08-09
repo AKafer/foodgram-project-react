@@ -28,13 +28,12 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
-
 class Recipe(models.Model):
     "Модель рецептов "
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='res_ings',
         verbose_name = 'Автор'
     )
     tags = models.ManyToManyField(
@@ -42,6 +41,12 @@ class Recipe(models.Model):
         through='Tag_to_Recipe',
         related_name='tag_recipe',
         verbose_name = 'Тэги'
+    )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='IngredientAmount',
+        related_name='Ingredient_recipe',
+        verbose_name = 'Ингредиенты'
     )
     name = models.CharField(max_length=256, verbose_name = 'Название')
     image = models.ImageField(upload_to='recipe/', verbose_name = 'Изображение')
@@ -63,18 +68,20 @@ class Recipe(models.Model):
 
 class IngredientAmount(models.Model):
     "Модель ингридиентов"
-    name = models.CharField(max_length=256, verbose_name = 'Наименование')
-    measurement_unit =models.CharField(max_length=50, verbose_name = 'Ед. измерения')
-    amount = models.IntegerField(verbose_name = 'Количество')
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name = 'Инредиент'
+    )
     recipe =  models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name = 'ingredients',
         verbose_name = 'Рецепт'
     )
-    
+    amount = models.IntegerField(verbose_name = 'Количество')
+
     def __str__(self):
-        return f'{self.name}'
+        return f'{(self.amount)}'
 
     class Meta:
         verbose_name = 'Ингредиент в рецепте'

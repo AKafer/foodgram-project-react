@@ -7,16 +7,20 @@ from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
 
 class TagInline(admin.TabularInline):
     model = Tag_to_Recipe
-    extra = 1
+    extra = 3
+
+class IngredientsInline(admin.TabularInline):
+    model = IngredientAmount
+    extra = 3
 
 class RecipeAdmin(admin.ModelAdmin):
+    inlines = (TagInline, IngredientsInline)
     list_display = (
         'id', 'name', 'author', 'cooking_time', 'image', 'pub_date'
     )
     list_display_links = ('id', 'name')
     search_fields = ('name', 'author__username')
-    list_filter = ('tags', 'pub_date',)
-    inlines = (TagInline,)
+    list_filter = ('ingredients', 'tags', 'pub_date',)
     readonly_fields = ('count_add_favorited',)
     empty_value_display = '-пусто-'
 
@@ -35,9 +39,8 @@ class IngredientAdmin(admin.ModelAdmin):
     list_editable = ()
 
 class IngredientAmountAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'recipe', 'measurement_unit', 'amount')
-    list_display_links = ('id', 'name')
-    readonly_fields = ('name',)
+    list_display = ('id', 'ingredient', 'recipe', 'amount')
+    list_display_links = ('id', 'ingredient')
     empty_value_display = '-пусто-'
 
 class TagtAdmin(admin.ModelAdmin):
