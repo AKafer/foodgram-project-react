@@ -1,17 +1,18 @@
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
-                     ShoppingCart, Tag, Tag_to_Recipe)
+                     ShoppingCart, Tag, TagRecipe)
 
 
 class TagInline(admin.TabularInline):
-    model = Tag_to_Recipe
+    model = TagRecipe
     extra = 3
+
 
 class IngredientsInline(admin.TabularInline):
     model = IngredientAmount
     extra = 3
+
 
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (TagInline, IngredientsInline)
@@ -38,10 +39,12 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
     list_editable = ()
 
+
 class IngredientAmountAdmin(admin.ModelAdmin):
     list_display = ('id', 'ingredient', 'recipe', 'amount')
     list_display_links = ('id', 'ingredient')
     empty_value_display = '-пусто-'
+
 
 class TagtAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug', 'color')
@@ -54,7 +57,6 @@ admin.site.register(ShoppingCart)
 admin.site.register(Favorite)
 admin.site.register(Follow)
 admin.site.register(Tag, TagtAdmin)
-admin.site.register(Tag_to_Recipe)
+admin.site.register(TagRecipe)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientAmount, IngredientAmountAdmin)
-

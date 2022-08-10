@@ -2,7 +2,8 @@
 from rest_framework import mixins, viewsets
 
 
-class MyCreateDestroyClass(mixins.DestroyModelMixin,
-                            viewsets.GenericViewSet):
-    "Кастомный миксин класс"
+class CustomGetRetrieveClass(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
+    "Кастомный миксин класс для тэгов и ингредиентов"
     pass
