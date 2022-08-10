@@ -17,7 +17,7 @@ class Tag(models.Model):
         unique=True,
         verbose_name='Цвет в формате #XXXXXX'
     )
-    
+
     def __str__(self):
         return f'{self.slug}'
 
@@ -31,7 +31,7 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=256, verbose_name='Наименование')
     measurement_unit = models.CharField(
         max_length=50, verbose_name='Ед. измерения')
-    
+
     def __str__(self):
         return f'{self.name}'
 
@@ -50,7 +50,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        through='Tag_to_Recipe',
+        through='TagRecipe',
         related_name='tag_recipe',
         verbose_name='Тэги'
     )
@@ -68,7 +68,7 @@ class Recipe(models.Model):
         auto_now_add=True,
         verbose_name='Дата публикации'
     )
-    
+
     def __str__(self):
         return f'{self.name}'
 
@@ -79,7 +79,7 @@ class Recipe(models.Model):
 
 
 class IngredientAmount(models.Model):
-    """Модель ингридиентов"""
+    """Кастомная модель свяизи ингридиентов и рецептов"""
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
@@ -101,7 +101,7 @@ class IngredientAmount(models.Model):
 
 
 class TagRecipe(models.Model):
-    """Модель связи тэгов и рецепта"""
+    """Кастомная модель связи тэгов и рецепта"""
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
@@ -113,7 +113,7 @@ class TagRecipe(models.Model):
         related_name='tags_ref',
         verbose_name='Рецепт'
     )
-    
+
     def __str__(self):
         return f'{self.recipe}<-->{self.tag}'
 
@@ -123,6 +123,7 @@ class TagRecipe(models.Model):
 
 
 class Follow(models.Model):
+    """Модель подписок"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -145,6 +146,7 @@ class Follow(models.Model):
 
 
 class Favorite(models.Model):
+    """Модель избранного"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -165,6 +167,7 @@ class Favorite(models.Model):
 
 
 class ShoppingCart(models.Model):
+    """Модель списка покупок"""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

@@ -1,21 +1,16 @@
 import base64
-from email.policy import default
 
 from api.models import Follow, Recipe
-from django.contrib.auth import authenticate
-from django.core import serializers as sz
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext_lazy as _
 from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
-from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from .models import User
 
 
 class MyUserCreateSerializer(serializers.ModelSerializer):
-    """Класс сериализатора пользователей для админа."""
+    """Класс сериализатора для djoser для создания пользователей."""
 
     class Meta:
         model = User
@@ -26,7 +21,7 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
 
 
 class MyUserSerializer(serializers.ModelSerializer):
-    """Класс сериализатора пользователей для админа."""
+    """Класс сериализатора для djoser для управления пользователями."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,12 +30,13 @@ class MyUserSerializer(serializers.ModelSerializer):
             'email', 'id', 'username', 'first_name',
             'last_name', 'is_subscribed'
         )
-    
+
     def get_is_subscribed(self, obj):
+        """Функция определения подписан ли текущий пользователь на автора"""
         try:
             user_username = self.context['view'].request.user
             user = get_object_or_404(User, username=user_username)
-        except:
+        except Exception:
             return False
         if obj.username == user_username:
             return False
@@ -49,7 +45,9 @@ class MyUserSerializer(serializers.ModelSerializer):
 
 
 class MyUserSubsSerializer(serializers.ModelSerializer):
-    """Класс сериализатора пользователей для админа."""
+    """Класс сериализатора djoser для управления авторами
+    с дополтнительными полями: подписан ли текущий юзер, рецептами автора,
+    числом рецептов."""
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -60,19 +58,21 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
             'email', 'id', 'username', 'first_name',
             'last_name', 'is_subscribed', 'recipes', 'recipes_count'
         )
-        read_only_fields = ('email', 'username', 'first_name','last_name')
-    
+        read_only_fields = ('email', 'username', 'first_name', 'last_name')
+
     def get_is_subscribed(self, obj):
+        """Функция определения подписан ли текущий пользователь на автора"""
         try:
             user_username = self.context['view'].request.user
             user = get_object_or_404(User, username=user_username)
-        except:
+        except Exception:
             return True
         if obj.username == user_username:
             return False
         return Follow.objects.filter(user=user, author=obj).exists()
-    
+
     def get_recipes(self, obj):
+        """Функция получения рецептов автора"""
         author = get_object_or_404(User, username=obj.username)
         recipes = Recipe.objects.filter(author=author)
         list_rec = []
@@ -86,19 +86,25 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
                 "cooking_time": recipe.cooking_time
             })
         return list_rec[0:3]
-    
+
     def get_recipes_count(self, obj):
+        """Функция подсчета числа рецептов автора"""
         author = get_object_or_404(User, username=obj.username)
         number_recipes = Recipe.objects.filter(author=author).count()
         return number_recipes
 
-   
+
 class MyTokenCreateSerializer(serializers.Serializer):
-    password = serializers.CharField(required=False, style={"input_type": "password"})
+    """Кастомный класс для djoser для выдачи токенов по email и password"""
+    password = serializers.CharField(
+        required=False,
+        style={"input_type": "password"})
 
     default_error_messages = {
-        "invalid_credentials": settings.CONSTANTS.messages.INVALID_CREDENTIALS_ERROR,
-        "inactive_account": settings.CONSTANTS.messages.INACTIVE_ACCOUNT_ERROR,
+        "invalid_credentials": settings.
+        CONSTANTS.messages.INVALID_CREDENTIALS_ERROR,
+        "inactive_account": settings.
+        CONSTANTS.messages.INACTIVE_ACCOUNT_ERROR,
     }
 
     def __init__(self, *args, **kwargs):
@@ -119,15 +125,3 @@ class MyTokenCreateSerializer(serializers.Serializer):
         if self.user and self.user.is_active:
             return attrs
         self.fail("inactive_account")
-
-
-"""class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        read_only=True, slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-    author = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = Follow
-        fields = ('user', 'author')"""

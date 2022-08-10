@@ -49,7 +49,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path=r'(?P<pk>\d+)/favorite'
     )
     def subs_add_del(self, request, pk=None):
-        """Функция добавления и удаления в избранное"""
+        """Функция добавления и удаления рецептов в избранное"""
         user = get_object_or_404(User, username=request.user)
         recipe = get_object_or_404(Recipe, pk=pk)
         if str(self.request.method) == 'POST':
@@ -73,7 +73,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path=r'(?P<pk>\d+)/shopping_cart'
     )
     def shopping_cart_add_del(self, request, pk=None):
-        """Фукция добавления и удаления в лист покупок"""
+        """Фукция добавления и удаления рецептов в лист покупок"""
         user = get_object_or_404(User, username=request.user)
         recipe = get_object_or_404(Recipe, pk=pk)
         if str(self.request.method) == 'POST':
@@ -104,7 +104,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shop_dict = {}
         for recipe in recipes:
             ing_amounts = IngredientAmount.objects.filter(recipe=recipe)
+            n_rec = 0
             for ing in ing_amounts:
+                n_rec += 1
                 if ing.ingredient.name in shop_dict:
                     shop_dict[ing.ingredient][0] += ing.amount
                 else:
@@ -112,7 +114,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         ing.amount,
                         ing.ingredient.measurement_unit
                     ]
-        shop_string = 'Food_gram \nСписок покупок:'
+        shop_string = 'Food_gram\nВыбрано рецпетов: {n_rec}\nСписок покупок:'
         for key, value in shop_dict.items():
-            shop_string += f'\n{key} ({value[1]}) - {str(value[0])}' 
+            shop_string += f'\n{key} ({value[1]}) - {str(value[0])}'
         return HttpResponse(shop_string, content_type='text/plain')

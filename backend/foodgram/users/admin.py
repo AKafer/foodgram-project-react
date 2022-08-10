@@ -12,4 +12,5 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email',)
     empty_value_display = '-пусто-'
 
+
 admin.site.register(User, UserAdmin)

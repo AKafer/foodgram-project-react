@@ -4,7 +4,7 @@ from api.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.models import User
 
@@ -16,7 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
     "Класс представления юзеров"
     queryset = User.objects.all()
     serializer_class = MyUserSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -25,27 +25,37 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='me')
     def get_me(self, request):
+        """Функция предоставления данных о текущем пользователе"""
         user = get_object_or_404(User, username=request.user)
         serializer = MyUserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    @action(methods=['post', 'delete'], detail=False, url_path=r'(?P<id>\d+)/subscribe')
+
+    @action(
+        methods=['post', 'delete'],
+        detail=False,
+        url_path=r'(?P<id>\d+)/subscribe'
+    )
     def subsribe_add_del(self, request, id=None):
+        """Функция добавления/удаления подписки"""
         user = request.user
         author = get_object_or_404(User, pk=id)
         if str(self.request.method) == 'POST':
             if user != author:
                 Follow.objects.get_or_create(user=user, author=author)
                 author_serializer = MyUserSubsSerializer(author)
-                return Response(author_serializer.data, status=status.HTTP_201_CREATED)
+                return Response(
+                    author_serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
             return Response(status=status.HTTP_200_OK)
         follow = get_object_or_404(Follow, user=user, author=author)
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-  
+
 
 class SubscriptionViewSet(mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
+                          viewsets.GenericViewSet):
+    """Класс представления списка подписок текущего пользователя"""
     pagination_class = CustomPagination
     serializer_class = MyUserSubsSerializer
 
@@ -53,24 +63,4 @@ class SubscriptionViewSet(mixins.ListModelMixin,
         user = get_object_or_404(User, username=self.request.user)
         subscribes = Follow.objects.filter(user=user).values('author')
         authors = User.objects.filter(pk__in=subscribes)
-        return authors  
-
-
-"""class UserFollowViewSet(mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
-    "Класс удаление подписок"
-    queryset = Follow.objects.all()
-    serializer_class = FollowSerializer
-
-    @action(methods=['delete'], detail=False)
-    def delete(self, request, **kwargs):
-        user = request.user
-        author_id = self.kwargs.get('id')
-        author = get_object_or_404(User, pk=author_id)
-        follow = get_object_or_404(Follow, user=user, author=author)
-        follow.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)"""
-    
-    
-
-    
+        return authors
