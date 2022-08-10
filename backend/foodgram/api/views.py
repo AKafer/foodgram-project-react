@@ -6,6 +6,7 @@ from django_filters import rest_framework as dfilters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
 from users.models import User
 
 from .filters import MyIngredientFilter, MyRecipeFilter
@@ -108,13 +109,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             for ing in ing_amounts:
                 n_rec += 1
                 if ing.ingredient.name in shop_dict:
-                    shop_dict[ing.ingredient][0] += ing.amount
+                    shop_dict[ing.ingredient.name][0] += ing.amount
                 else:
                     shop_dict[ing.ingredient.name] = [
                         ing.amount,
                         ing.ingredient.measurement_unit
                     ]
-        shop_string = 'Food_gram\nВыбрано рецпетов: {n_rec}\nСписок покупок:'
+        shop_string = f'Food_gram\nВыбрано рецпетов: {n_rec}\nСписок покупок:'
         for key, value in shop_dict.items():
             shop_string += f'\n{key} ({value[1]}) - {str(value[0])}'
+        # return Response(shop_dict)
         return HttpResponse(shop_string, content_type='text/plain')

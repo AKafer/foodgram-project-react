@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+
 from users.models import User
 from users.serializers import MyUserSerializer
 
@@ -57,7 +58,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tag_list = self.initial_data.pop('tags')
         ing_list = self.initial_data.pop('ingredients')
-        print(ing_list)
         recipe = Recipe.objects.create(**validated_data)
         for tag_pk in tag_list:
             cur_tag = get_object_or_404(Tag, pk=tag_pk)
@@ -72,7 +72,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        print(self.initial_data)
         tag_list = self.initial_data.pop('tags')
         ing_list = self.initial_data.pop('ingredients')
         instance.name = validated_data.get('name', instance.name)
@@ -96,21 +95,27 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_favorited(self, obj):
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         """Функция проверки добавления текущим пользователем
         рецепта в избранное."""
         try:
             user_username = self.context['view'].request.user
-            user = get_object_or_404(User, username=user_username)
-        except Exception:
+        except KeyError:
             return False
+        if not user_username.is_authenticated:
+            return False
+        user = get_object_or_404(User, username=user_username)
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
+        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
         """Функция проверки добавления текущим пользователем
         рецепта в лист покупок."""
         try:
             user_username = self.context['view'].request.user
-            user = get_object_or_404(User, username=user_username)
-        except Exception:
+        except KeyError:
             return False
+        if not user_username.is_authenticated:
+            return False
+        user = get_object_or_404(User, username=user_username)
         return ShoppingCart.objects.filter(user=user, recipe=obj).exists()

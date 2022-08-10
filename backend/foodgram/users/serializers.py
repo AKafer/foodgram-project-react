@@ -1,10 +1,11 @@
 import base64
 
-from api.models import Follow, Recipe
 from django.shortcuts import get_object_or_404
 from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
 from rest_framework import serializers
+
+from api.models import Follow, Recipe
 
 from .models import User
 
@@ -33,11 +34,14 @@ class MyUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Функция определения подписан ли текущий пользователь на автора"""
+        print('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
         try:
             user_username = self.context['view'].request.user
-            user = get_object_or_404(User, username=user_username)
-        except Exception:
+        except KeyError:
             return False
+        if not user_username.is_authenticated:
+            return False
+        user = get_object_or_404(User, username=user_username)
         if obj.username == user_username:
             return False
         author = get_object_or_404(User, username=obj.username)
@@ -61,12 +65,13 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def get_is_subscribed(self, obj):
+        print('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
         """Функция определения подписан ли текущий пользователь на автора"""
         try:
             user_username = self.context['view'].request.user
-            user = get_object_or_404(User, username=user_username)
-        except Exception:
+        except KeyError:
             return True
+        user = get_object_or_404(User, username=user_username)
         if obj.username == user_username:
             return False
         return Follow.objects.filter(user=user, author=obj).exists()
@@ -90,8 +95,7 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
     def get_recipes_count(self, obj):
         """Функция подсчета числа рецептов автора"""
         author = get_object_or_404(User, username=obj.username)
-        number_recipes = Recipe.objects.filter(author=author).count()
-        return number_recipes
+        return Recipe.objects.filter(author=author).count()
 
 
 class MyTokenCreateSerializer(serializers.Serializer):
@@ -121,7 +125,7 @@ class MyTokenCreateSerializer(serializers.Serializer):
         if not self.user:
             self.user = User.objects.filter(email=email).first()
             if self.user and not self.user.check_password(password):
-                self.fail("invalid_credentials")
+                return self.fail("invalid_credentials")
         if self.user and self.user.is_active:
             return attrs
-        self.fail("inactive_account")
+        return self.fail("inactive_account")

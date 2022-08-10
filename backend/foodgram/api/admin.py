@@ -29,8 +29,7 @@ class RecipeAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
     def count_add_favorited(self, obj):
-        count = Favorite.objects.filter(recipe=obj).count()
-        return count
+        return Favorite.objects.filter(recipe=obj).count()
 
     count_add_favorited.short_description = 'Сколько раз добавлен в избранное'
 
