@@ -31,6 +31,12 @@ cd foodgram/
 python manage.py migrate
 ```
 
+### Загрузить данные:
+
+```
+python manage.py loaddata dump.json
+```
+
 ### Запустить проект
 
 `python manage.py runserver`
