@@ -34,7 +34,6 @@ class MyUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Функция определения подписан ли текущий пользователь на автора"""
-        print('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
         try:
             user_username = self.context['view'].request.user
         except KeyError:
@@ -65,7 +64,6 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def get_is_subscribed(self, obj):
-        print('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG')
         """Функция определения подписан ли текущий пользователь на автора"""
         try:
             user_username = self.context['view'].request.user

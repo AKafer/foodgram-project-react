@@ -95,7 +95,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_favorited(self, obj):
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         """Функция проверки добавления текущим пользователем
         рецепта в избранное."""
         try:
@@ -108,7 +107,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
         """Функция проверки добавления текущим пользователем
         рецепта в лист покупок."""
         try:
