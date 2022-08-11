@@ -29,6 +29,23 @@ class IngredientViewSet(CustomGetRetrieveClass):
     filterset_class = IngredientFilter
 
 
+def add_del_metod(request, pk, instmodel):
+    user = get_object_or_404(User, username=request.user)
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if str(request.method) == 'POST':
+        instmodel.objects.get_or_create(user=user, recipe=recipe)
+        recipe_responce = {
+            "id": recipe.id,
+            "name": recipe.name,
+            "image": str(recipe.image),
+            "cooking_time": recipe.cooking_time
+        }
+        return Response(recipe_responce, status=status.HTTP_201_CREATED)
+    instance = get_object_or_404(instmodel, user=user, recipe=recipe)
+    instance.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class RecipeViewSet(viewsets.ModelViewSet):
     """Класс представления рецептов"""
     queryset = Recipe.objects.all()
@@ -44,30 +61,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['post', 'delete'],
         detail=False,
-        url_path=r'(?P<pk>\d+)/(?P<model>\w+)'
+        url_path=r'(?P<pk>\d+)/favorite'
     )
-    def instance_add_del(self, request, pk=None, model=None):
-        """Функция добавления и удаления рецептов
-        в избранное и корзину покупок."""
-        inst_dict = {
-            'favorite': Favorite,
-            'shopping_cart': ShoppingCart,
-        }
-        instmodel = inst_dict[model]
-        user = get_object_or_404(User, username=request.user)
-        recipe = get_object_or_404(Recipe, pk=pk)
-        if str(self.request.method) == 'POST':
-            instmodel.objects.get_or_create(user=user, recipe=recipe)
-            recipe_responce = {
-                "id": recipe.id,
-                "name": recipe.name,
-                "image": str(recipe.image),
-                "cooking_time": recipe.cooking_time
-            }
-            return Response(recipe_responce, status=status.HTTP_201_CREATED)
-        instance = get_object_or_404(instmodel, user=user, recipe=recipe)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def to_favorite_add_del(self, request, pk=None):
+        return add_del_metod(request, pk, Favorite)
+
+    @action(
+        methods=['post', 'delete'],
+        detail=False,
+        url_path=r'(?P<pk>\d+)/shopping_cart'
+    )
+    def to_shopping_cart_add_del(self, request, pk=None):
+        return add_del_metod(request, pk, ShoppingCart)
 
     @action(methods=['get'], detail=False, url_path='download_shopping_cart')
     def load_shop_list(self, request):
