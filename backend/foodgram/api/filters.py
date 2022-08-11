@@ -4,7 +4,7 @@ from django_filters import rest_framework as dfilters
 from .models import Favorite, Ingredient, Recipe, ShoppingCart, User
 
 
-class MyIngredientFilter(dfilters.FilterSet):
+class IngredientFilter(dfilters.FilterSet):
     """Фильтр для поиска ингредиентов по имени"""
     name = dfilters.CharFilter(field_name="name", lookup_expr="istartswith")
 
@@ -13,7 +13,7 @@ class MyIngredientFilter(dfilters.FilterSet):
         fields = ('name', )
 
 
-class MyRecipeFilter(dfilters.FilterSet):
+class RecipeFilter(dfilters.FilterSet):
     """Фильтр рецептов по полям: автор, тэги, избранное, в корзине покупок"""
     author = dfilters.CharFilter()
     is_favorited = dfilters.BooleanFilter(method='get_is_favorited')

@@ -1,11 +1,11 @@
 import base64
 
+from api.models import Follow, Recipe
 from django.shortcuts import get_object_or_404
 from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
 from rest_framework import serializers
-
-from api.models import Follow, Recipe
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import User
 
@@ -34,17 +34,14 @@ class MyUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Функция определения подписан ли текущий пользователь на автора"""
-        try:
-            user_username = self.context['view'].request.user
-        except KeyError:
-            return False
-        if not user_username.is_authenticated:
-            return False
-        user = get_object_or_404(User, username=user_username)
-        if obj.username == user_username:
-            return False
-        author = get_object_or_404(User, username=obj.username)
-        return Follow.objects.filter(user=user, author=author).exists()
+        if self.context:
+            username = self.context['request'].user
+            if not username.is_authenticated or obj.username == username:
+                return False
+            user = get_object_or_404(User, username=username)
+            author = get_object_or_404(User, username=obj.username)
+            return Follow.objects.filter(user=user, author=author).exists()
+        return False
 
 
 class MyUserSubsSerializer(serializers.ModelSerializer):
@@ -65,14 +62,14 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Функция определения подписан ли текущий пользователь на автора"""
-        try:
-            user_username = self.context['view'].request.user
-        except KeyError:
-            return True
-        user = get_object_or_404(User, username=user_username)
-        if obj.username == user_username:
-            return False
-        return Follow.objects.filter(user=user, author=obj).exists()
+        if self.context:
+            username = self.context['request'].user
+            if not username.is_authenticated or obj.username == username:
+                return False
+            user = get_object_or_404(User, username=username)
+            author = get_object_or_404(User, username=obj.username)
+            return Follow.objects.filter(user=user, author=author).exists()
+        return True
 
     def get_recipes(self, obj):
         """Функция получения рецептов автора"""
@@ -88,7 +85,7 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
                 "image": code_image,
                 "cooking_time": recipe.cooking_time
             })
-        return list_rec[0:3]
+        return list_rec[:3]
 
     def get_recipes_count(self, obj):
         """Функция подсчета числа рецептов автора"""
@@ -127,3 +124,24 @@ class MyTokenCreateSerializer(serializers.Serializer):
         if self.user and self.user.is_active:
             return attrs
         return self.fail("inactive_account")
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    """Класс сериализатора для Follow."""
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=['user', 'author'],
+                message='Эей, такая запись уже есть'
+            )
+        ]
+
+    def validate(self, data):
+        if data['user'] == data['author']:
+            raise serializers.ValidationError(
+                'Не спи! Нельзя подписываться на самого себя')
+        return data

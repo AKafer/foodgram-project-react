@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-
 from users.models import User
 from users.serializers import MyUserSerializer
 
@@ -34,6 +33,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
+        read_only_fields = ('id', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -62,13 +62,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag_pk in tag_list:
             cur_tag = get_object_or_404(Tag, pk=tag_pk)
             TagRecipe.objects.create(tag=cur_tag, recipe=recipe)
-        for ing in ing_list:
-            cur_ing = get_object_or_404(Ingredient, pk=ing['id'])
-            IngredientAmount.objects.create(
-                ingredient=cur_ing,
+        recipe_ings = [
+            IngredientAmount(
+                ingredient=get_object_or_404(Ingredient, pk=ing['id']),
                 recipe=recipe,
                 amount=ing['amount']
             )
+            for ing in ing_list
+        ]
+        IngredientAmount.objects.bulk_create(recipe_ings)
         return recipe
 
     def update(self, instance, validated_data):
@@ -84,36 +86,32 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag_pk in tag_list:
             cur_tag = get_object_or_404(Tag, pk=tag_pk)
             TagRecipe.objects.create(tag=cur_tag, recipe=instance)
-        for ing in ing_list:
-            cur_ing = get_object_or_404(Ingredient, pk=ing['id'])
-            IngredientAmount.objects.create(
-                ingredient=cur_ing,
+        recipe_ings = [
+            IngredientAmount(
+                ingredient=get_object_or_404(Ingredient, pk=ing['id']),
                 recipe=instance,
                 amount=ing['amount']
             )
+            for ing in ing_list
+        ]
+        IngredientAmount.objects.bulk_create(recipe_ings)
         instance.save()
         return instance
 
     def get_is_favorited(self, obj):
         """Функция проверки добавления текущим пользователем
         рецепта в избранное."""
-        try:
-            user_username = self.context['view'].request.user
-        except KeyError:
+        username = self.context['request'].user
+        if not username.is_authenticated:
             return False
-        if not user_username.is_authenticated:
-            return False
-        user = get_object_or_404(User, username=user_username)
+        user = get_object_or_404(User, username=username)
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Функция проверки добавления текущим пользователем
         рецепта в лист покупок."""
-        try:
-            user_username = self.context['view'].request.user
-        except KeyError:
+        username = self.context['request'].user
+        if not username.is_authenticated:
             return False
-        if not user_username.is_authenticated:
-            return False
-        user = get_object_or_404(User, username=user_username)
+        user = get_object_or_404(User, username=username)
         return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
