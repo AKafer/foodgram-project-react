@@ -88,8 +88,8 @@ TELEGRAM_TO, TELEGRAM_TOKEN
 ```
 sudo docker-compose exec web python manage.py migrate
 sudo docker-compose exec web python manage.py loaddata dump2.json
-docker-compose exec web python manage.py createsuperuser
-docker-compose exec web python manage.py collectstatic --no-input
+sudo docker-compose exec web python manage.py createsuperuser
+sudo docker-compose exec web python manage.py collectstatic --no-input
 
 ```
 
