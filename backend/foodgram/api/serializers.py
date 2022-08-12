@@ -24,7 +24,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
-    """Класс сериализатора ингредиентов в рецепте"""
+    """Класс сериализатора ингредиентов в рецепте."""
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -37,7 +37,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Класс сериализатора рецептов"""
+    """Класс сериализатора рецептов."""
     image = Base64ImageField()
     author = MyUserSerializer(read_only=True)
     ingredients = IngredientAmountSerializer(
@@ -56,8 +56,8 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart')
 
     def create(self, validated_data):
-        tag_list = self.initial_data.pop('tags')
-        ing_list = self.initial_data.pop('ingredients')
+        tag_list = self.initial_data.get('tags')
+        ing_list = self.initial_data.get('ingredients')
         recipe = Recipe.objects.create(**validated_data)
         for tag_pk in tag_list:
             cur_tag = get_object_or_404(Tag, pk=tag_pk)
@@ -74,8 +74,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        tag_list = self.initial_data.pop('tags')
-        ing_list = self.initial_data.pop('ingredients')
+        tag_list = self.initial_data.get('tags')
+        ing_list = self.initial_data.get('ingredients')
         instance.name = validated_data.get('name', instance.name)
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time)

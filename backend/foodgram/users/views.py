@@ -14,7 +14,7 @@ from .serializers import (FollowSerializer, MyUserCreateSerializer,
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    "Класс представления юзеров"
+    "Класс представления юзеров."
     queryset = User.objects.all()
     serializer_class = MyUserSerializer
     permission_classes = (AllowAny,)
@@ -31,25 +31,25 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def get_me(self, request):
-        """Функция предоставления данных о текущем пользователе"""
+        """Функция предоставления данных о текущем пользователе."""
         user = get_object_or_404(User, username=request.user)
         serializer = MyUserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class APIFollow(APIView):
+    """Класс управления подписками."""
     def post(self, request, pk=None):
         user = get_object_or_404(User, username=request.user)
         author = get_object_or_404(User, pk=pk)
         serializer = FollowSerializer(data={"user": user.pk, "author": pk})
-        if serializer.is_valid():
-            serializer.save()
-            author_serializer = MyUserSubsSerializer(author)
-            return Response(
-                author_serializer.data,
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        author_serializer = MyUserSubsSerializer(author)
+        return Response(
+            author_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
     def delete(self, request, pk=None):
         user = get_object_or_404(User, username=request.user)
@@ -60,7 +60,7 @@ class APIFollow(APIView):
 
 class SubscriptionViewSet(mixins.ListModelMixin,
                           viewsets.GenericViewSet):
-    """Класс представления списка подписок текущего пользователя"""
+    """Класс представления списка подписок текущего пользователя."""
     pagination_class = CustomPagination
     serializer_class = MyUserSubsSerializer
     permission_classes = (IsAuthenticated,)

@@ -63,7 +63,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=256, verbose_name='Название')
     image = models.ImageField(upload_to='recipe/', verbose_name='Изображение')
     text = models.TextField(verbose_name='Порядок приготовления')
-    cooking_time = models.IntegerField(verbose_name='Время готовки')
+    cooking_time = models.PositiveIntegerField(verbose_name='Время готовки')
     pub_date = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата публикации'
@@ -90,7 +90,7 @@ class IngredientAmount(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Рецепт'
     )
-    amount = models.IntegerField(verbose_name='Количество')
+    amount = models.PositiveIntegerField(verbose_name='Количество')
 
     def __str__(self):
         return f'{self.amount}'
