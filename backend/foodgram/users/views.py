@@ -1,6 +1,7 @@
 
 from api.models import Follow
 from api.pagination import CustomPagination
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -8,9 +9,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
-from django.shortcuts import redirect
-from django.http import HttpResponseRedirect
-from djoser.views import UserViewSet
 
 from .serializers import (FollowSerializer, MyUserCreateSerializer,
                           MyUserSerializer, MyUserSubsSerializer)
