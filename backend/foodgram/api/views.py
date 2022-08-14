@@ -12,17 +12,17 @@ from .models import (Favorite, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag)
 from .pagination import CustomPagination
 from .permissions import OwnerOrReadOnly
-from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer
+from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer, RecipeReadSerializer
 
 
 class TagViewSet(CustomGetRetrieveClass):
-    """Класс представления цветовых тэгов"""
+    """Класс представления цветовых тэгов."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
 
 class IngredientViewSet(CustomGetRetrieveClass):
-    """Класс представления ингридиентов"""
+    """Класс представления ингридиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (dfilters.DjangoFilterBackend,)
@@ -47,13 +47,18 @@ def add_del_metod(request, pk, instmodel):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Класс представления рецептов"""
+    """Класс представления рецептов."""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
     permission_classes = (OwnerOrReadOnly,)
     filter_backends = (dfilters.DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return RecipeReadSerializer
+        return RecipeSerializer
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -76,7 +81,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='download_shopping_cart')
     def load_shop_list(self, request):
-        """Функция скачивания листа покупок в файле txt"""
+        """Функция скачивания листа покупок в файле txt."""
         user = get_object_or_404(User, username=request.user)
         recipes_id = ShoppingCart.objects.filter(user=user).values('recipe')
         recipes = Recipe.objects.filter(pk__in=recipes_id)

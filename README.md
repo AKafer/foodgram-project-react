@@ -1,13 +1,15 @@
+![workflow](https://github.com/AKafer/*foodgram-project-react /actions/workflows/main.yml/badge.svg)*
+
 # FOODGRAM
 
 ### «Продуктовый помощник»: сайт, на котором пользователи будут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Сервис «Список покупок» позволит пользователям создавать список продуктов, которые нужно купить для приготовления выбранных блюд.
 
 ## Запустить проект локально:
 
-### * Клонировать репозиторий и перейти в папку backend:
+### Клонировать репозиторий и перейти в папку backend:
 
 ```
-git clone https://github.com/AKafer/foodgram-project-react.githttps://github.com/AKafer/foodgram-project-react.git
+git clone https://github.com/AKafer/foodgram-project-react.git
 cd backend/
 ```
 
