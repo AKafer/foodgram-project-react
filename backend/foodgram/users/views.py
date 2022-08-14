@@ -2,7 +2,7 @@
 from api.models import Follow
 from api.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -35,6 +35,22 @@ class UserViewSet(viewsets.ModelViewSet):
         user = get_object_or_404(User, username=request.user)
         serializer = MyUserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=['post'],
+        detail=False,
+        url_path='set_password',
+        permission_classes=(IsAuthenticated,)
+    )
+    def set_password(self, request):
+        """Функция предоставления данных о текущем пользователе."""
+        user = get_object_or_404(User, username=request.user)
+        if request.data['current_password'] == user.password:
+            user.password = request.data['new_password']
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        raise serializers.ValidationError(
+            'Текущий пароль не верный')
 
 
 class APIFollow(APIView):

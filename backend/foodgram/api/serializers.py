@@ -36,6 +36,8 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
 
 
 class BaseRecipeSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+    author = MyUserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -64,8 +66,6 @@ class BaseRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(BaseRecipeSerializer):
     """Класс сериализатора рецептов."""
-    image = Base64ImageField()
-    author = MyUserSerializer(read_only=True)
     ingredients = IngredientAmountSerializer(
         source='ingredientamount_set',
         many=True,
@@ -123,11 +123,15 @@ class RecipeSerializer(BaseRecipeSerializer):
         instance.save()
         return instance
 
+    def validate(self, data):
+        if data['cooking_time'] == 0:
+            raise serializers.ValidationError(
+                'Время не может быть равным нулю')
+        return data
+
 
 class RecipeReadSerializer(BaseRecipeSerializer):
     """Класс сериализатора рецептов."""
-    image = Base64ImageField()
-    author = MyUserSerializer(read_only=True)
     ingredients = IngredientAmountSerializer(
         source='ingredientamount_set',
         many=True,

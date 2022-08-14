@@ -16,7 +16,7 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'email', 'username', 'first_name',
+            'id', 'email', 'username', 'first_name',
             'last_name', 'password'
         )
 
@@ -33,7 +33,7 @@ class MyUserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        """Функция определения подписан ли текущий пользователь на автора"""
+        """Функция определения подписан ли текущий пользователь на автора."""
         if self.context:
             username = self.context['request'].user
             if not username.is_authenticated or obj.username == username:
@@ -61,7 +61,7 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def get_is_subscribed(self, obj):
-        """Функция определения подписан ли текущий пользователь на автора"""
+        """Функция определения подписан ли текущий пользователь на автора."""
         if self.context:
             username = self.context['request'].user
             if not username.is_authenticated or obj.username == username:
@@ -94,7 +94,6 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
 
 
 class MyTokenCreateSerializer(serializers.Serializer):
-    """Кастомный класс для djoser для выдачи токенов по email и password"""
     password = serializers.CharField(
         required=False,
         style={"input_type": "password"})
@@ -127,7 +126,7 @@ class MyTokenCreateSerializer(serializers.Serializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Класс сериализатора для Follow."""
+    """Класс сериализатора для управления подписками."""
 
     class Meta:
         model = Follow
