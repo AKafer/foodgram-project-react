@@ -2,6 +2,7 @@ import base64
 
 from api.models import Follow, Recipe
 from django.shortcuts import get_object_or_404
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from djoser.compat import get_user_email_field_name
 from djoser.conf import settings
 from rest_framework import serializers

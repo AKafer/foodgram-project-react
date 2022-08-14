@@ -8,6 +8,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
+from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
+from djoser.views import UserViewSet
 
 from .serializers import (FollowSerializer, MyUserCreateSerializer,
                           MyUserSerializer, MyUserSubsSerializer)
@@ -43,12 +46,11 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def set_password(self, request):
-        """Функция предоставления данных о текущем пользователе."""
         user = get_object_or_404(User, username=request.user)
         if request.data['current_password'] == user.password:
             user.password = request.data['new_password']
             user.save()
-            return Response(status=status.HTTP_200_OK)
+            return HttpResponseRedirect(redirect_to='/api/recipes/')
         raise serializers.ValidationError(
             'Текущий пароль не верный')
 

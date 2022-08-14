@@ -126,7 +126,7 @@ class RecipeSerializer(BaseRecipeSerializer):
     def validate(self, data):
         if data['cooking_time'] == 0:
             raise serializers.ValidationError(
-                'Время не может быть равным нулю')
+                'Время должно быть положительным число больше нуля')
         return data
 
 
