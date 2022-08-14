@@ -39,7 +39,6 @@ class BaseRecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
-
     class Meta:
         model = Recipe
         fields = ('is_favorited', 'is_in_shopping_cart')
@@ -72,12 +71,16 @@ class RecipeSerializer(BaseRecipeSerializer):
         many=True,
         read_only=True
     )
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all()
+    )
 
     class Meta:
         model = Recipe
         fields = ('id', 'author', 'name', 'image', 'text', 'ingredients',
-                  'tags', 'cooking_time', 'is_favorited', 'is_in_shopping_cart')
+                  'tags', 'cooking_time', 'is_favorited',
+                  'is_in_shopping_cart')
 
     def create(self, validated_data):
         ing_list = self.initial_data.get('ingredients')
@@ -132,8 +135,8 @@ class RecipeReadSerializer(BaseRecipeSerializer):
     )
     tags = TagSerializer(many=True)
 
-
     class Meta:
         model = Recipe
         fields = ('id', 'author', 'name', 'image', 'text', 'ingredients',
-                  'tags', 'cooking_time', 'is_favorited', 'is_in_shopping_cart')
+                  'tags', 'cooking_time', 'is_favorited',
+                  'is_in_shopping_cart')

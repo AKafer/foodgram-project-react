@@ -12,7 +12,8 @@ from .models import (Favorite, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag)
 from .pagination import CustomPagination
 from .permissions import OwnerOrReadOnly
-from .serializers import IngredientSerializer, RecipeSerializer, TagSerializer, RecipeReadSerializer
+from .serializers import (IngredientSerializer, RecipeReadSerializer,
+                          RecipeSerializer, TagSerializer)
 
 
 class TagViewSet(CustomGetRetrieveClass):
