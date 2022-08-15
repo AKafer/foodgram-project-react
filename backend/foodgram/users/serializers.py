@@ -2,15 +2,14 @@ import base64
 
 from api.models import Follow, Recipe
 from django.shortcuts import get_object_or_404
-from djoser.compat import get_user_email_field_name
-from djoser.conf import settings
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from .models import User
 
 
-class MyUserCreateSerializer(serializers.ModelSerializer):
+class MyUserCreateSerializer(UserCreateSerializer):
     """Класс сериализатора для djoser для создания пользователей."""
 
     class Meta:
@@ -21,7 +20,7 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
         )
 
 
-class MyUserSerializer(serializers.ModelSerializer):
+class MyUserSerializer(UserSerializer):
     """Класс сериализатора для djoser для управления пользователями."""
     is_subscribed = serializers.SerializerMethodField()
 
@@ -44,7 +43,7 @@ class MyUserSerializer(serializers.ModelSerializer):
         return False
 
 
-class MyUserSubsSerializer(serializers.ModelSerializer):
+class MyUserSubsSerializer(UserSerializer):
     """Класс сериализатора djoser для управления авторами
     с дополтнительными полями: подписан ли текущий юзер, рецептами автора,
     числом рецептов."""
@@ -91,38 +90,6 @@ class MyUserSubsSerializer(serializers.ModelSerializer):
         """Функция подсчета числа рецептов автора"""
         author = get_object_or_404(User, username=obj.username)
         return Recipe.objects.filter(author=author).count()
-
-
-class MyTokenCreateSerializer(serializers.Serializer):
-    password = serializers.CharField(
-        required=False,
-        style={"input_type": "password"})
-
-    default_error_messages = {
-        "invalid_credentials": settings.
-        CONSTANTS.messages.INVALID_CREDENTIALS_ERROR,
-        "inactive_account": settings.
-        CONSTANTS.messages.INACTIVE_ACCOUNT_ERROR,
-    }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = None
-
-        self.email_field = get_user_email_field_name(User)
-        self.fields[self.email_field] = serializers.EmailField()
-
-    def validate(self, attrs):
-        password = attrs.get("password")
-        email = attrs.get("email")
-        self.user = User.objects.filter(email=email, password=password).first()
-        if not self.user:
-            self.user = User.objects.filter(email=email).first()
-            if self.user and not self.user.check_password(password):
-                return self.fail("invalid_credentials")
-        if self.user and self.user.is_active:
-            return attrs
-        return self.fail("inactive_account")
 
 
 class FollowSerializer(serializers.ModelSerializer):
