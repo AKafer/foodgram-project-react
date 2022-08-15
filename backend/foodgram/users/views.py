@@ -1,56 +1,14 @@
 
 from api.models import Follow
 from api.pagination import CustomPagination
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, serializers, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import mixins, status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
 
-from .serializers import (FollowSerializer, MyUserCreateSerializer,
-                          MyUserSerializer, MyUserSubsSerializer)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    "Класс представления юзеров."
-    queryset = User.objects.all()
-    serializer_class = MyUserSerializer
-    permission_classes = (AllowAny,)
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return MyUserCreateSerializer
-        return MyUserSerializer
-
-    @action(
-        methods=['get'],
-        detail=False,
-        url_path='me',
-        permission_classes=(IsAuthenticated,)
-    )
-    def get_me(self, request):
-        """Функция предоставления данных о текущем пользователе."""
-        user = get_object_or_404(User, username=request.user)
-        serializer = MyUserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(
-        methods=['post'],
-        detail=False,
-        url_path='set_password',
-        permission_classes=(IsAuthenticated,)
-    )
-    def set_password(self, request):
-        user = get_object_or_404(User, username=request.user)
-        if request.data['current_password'] == user.password:
-            user.password = request.data['new_password']
-            user.save()
-            return HttpResponseRedirect(redirect_to='/api/recipes/')
-        raise serializers.ValidationError(
-            'Текущий пароль не верный')
+from .serializers import FollowSerializer, MyUserSubsSerializer
 
 
 class APIFollow(APIView):
