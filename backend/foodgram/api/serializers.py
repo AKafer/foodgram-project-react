@@ -35,6 +35,18 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
+class IngredientAmountCreateSerializer(serializers.ModelSerializer):
+    """Класс сериализатора ингредиентов в рецепте."""
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
+    amount = serializers.IntegerField()
+
+    class Meta:
+        model = IngredientAmount
+        fields = ('id', 'amount')
+
+
 class BaseRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     author = MyUserSerializer(read_only=True)
@@ -66,10 +78,9 @@ class BaseRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(BaseRecipeSerializer):
     """Класс сериализатора рецептов."""
-    ingredients = IngredientAmountSerializer(
+    ingredients = IngredientAmountCreateSerializer(
         source='ingredientamount_set',
-        many=True,
-        read_only=True
+        many=True
     )
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -83,14 +94,14 @@ class RecipeSerializer(BaseRecipeSerializer):
                   'is_in_shopping_cart')
 
     def create(self, validated_data):
-        ing_list = self.initial_data.get('ingredients')
+        ing_list = validated_data.pop('ingredientamount_set')
         tag_list = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         for tag_pk in tag_list:
             TagRecipe.objects.create(tag=tag_pk, recipe=recipe)
         recipe_ings = [
             IngredientAmount(
-                ingredient=get_object_or_404(Ingredient, pk=ing['id']),
+                ingredient=ing['id'],
                 recipe=recipe,
                 amount=ing['amount']
             )
@@ -100,7 +111,7 @@ class RecipeSerializer(BaseRecipeSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ing_list = self.initial_data.get('ingredients')
+        ing_list = validated_data.pop('ingredientamount_set')
         tag_list = validated_data.pop('tags')
         instance.name = validated_data.get('name', instance.name)
         instance.cooking_time = validated_data.get(
@@ -113,7 +124,7 @@ class RecipeSerializer(BaseRecipeSerializer):
             TagRecipe.objects.create(tag=tag_pk, recipe=instance)
         recipe_ings = [
             IngredientAmount(
-                ingredient=get_object_or_404(Ingredient, pk=ing['id']),
+                ingredient=ing['id'],
                 recipe=instance,
                 amount=ing['amount']
             )
@@ -134,8 +145,7 @@ class RecipeReadSerializer(BaseRecipeSerializer):
     """Класс сериализатора рецептов."""
     ingredients = IngredientAmountSerializer(
         source='ingredientamount_set',
-        many=True,
-        read_only=True
+        many=True
     )
     tags = TagSerializer(many=True)
 

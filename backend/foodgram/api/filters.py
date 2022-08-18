@@ -1,12 +1,11 @@
-from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as dfilters
 
-from .models import Favorite, Ingredient, Recipe, ShoppingCart, User
+from .models import Ingredient, Recipe, Tag
 
 
 class IngredientFilter(dfilters.FilterSet):
     """Фильтр для поиска ингредиентов по имени"""
-    name = dfilters.CharFilter(field_name="name", lookup_expr="istartswith")
+    name = dfilters.CharFilter(field_name="name", lookup_expr="icontains")
 
     class Meta:
         model = Ingredient
@@ -19,26 +18,21 @@ class RecipeFilter(dfilters.FilterSet):
     is_favorited = dfilters.BooleanFilter(method='get_is_favorited')
     is_in_shopping_cart = dfilters.BooleanFilter(
         method='get_is_in_shopping_cart')
-    tags = dfilters.AllValuesMultipleFilter(
-        field_name="tags__slug", lookup_expr="icontains")
+    tags = dfilters.ModelMultipleChoiceFilter(
+        field_name='tags__slug',
+        queryset=Tag.objects.all(),
+        to_field_name='slug',
+    )
 
     def get_is_favorited(self, queryset, name, value):
-        """Функция фильтрации рецептов по избранному и тэгам."""
-        list_tags = self.request.query_params.getlist('tags')
-        user = get_object_or_404(User, username=self.request.user)
-        favorite_recipes = Favorite.objects.filter(user=user).values('recipe')
-        if list_tags:
-            return Recipe.objects.filter(
-                pk__in=favorite_recipes, tags__slug__in=list_tags).distinct()
-        else:
-            return Recipe.objects.filter(pk__in=favorite_recipes)
+        if value and self.request.user.is_authenticated:
+            return queryset.filter(favorites__user=self.request.user)
+        return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
-        """Функция фильрации рецептов по добавлению в корзину покупок"""
-        user = get_object_or_404(User, username=self.request.user)
-        for_shopping_recipes = ShoppingCart.objects.filter(
-            user=user).values('recipe')
-        return Recipe.objects.filter(pk__in=for_shopping_recipes)
+        if value and self.request.user.is_authenticated:
+            return queryset.filter(shoppingcart__user=self.request.user)
+        return queryset
 
     class Meta:
         model = Recipe
