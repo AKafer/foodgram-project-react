@@ -1,11 +1,10 @@
-import base64
-
+from drf_extra_fields.fields import Base64ImageField
 from api.models import Follow, Recipe
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
+#from api.serializers import RecipeLiteSerializer
 from .models import User
 
 
@@ -43,6 +42,15 @@ class MyUserSerializer(UserSerializer):
         return False
 
 
+class RecipeLiteSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(read_only=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('id', 'name', 'cooking_time')
+
+
 class MyUserSubsSerializer(UserSerializer):
     """Класс сериализатора djoser для управления авторами
     с дополтнительными полями: подписан ли текущий юзер, рецептами автора,
@@ -60,7 +68,6 @@ class MyUserSubsSerializer(UserSerializer):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def get_is_subscribed(self, obj):
-        """Функция определения подписан ли текущий пользователь на автора."""
         if self.context:
             username = self.context['request'].user
             if not username.is_authenticated or obj.username == username:
@@ -71,20 +78,16 @@ class MyUserSubsSerializer(UserSerializer):
         return True
 
     def get_recipes(self, obj):
-        """Функция получения рецептов автора"""
+        request = self.context.get('request')
+        try:
+            limit = request.GET.get('recipes_limit')
+        except AttributeError:
+            limit = False
         author = get_object_or_404(User, username=obj.username)
         recipes = Recipe.objects.filter(author=author)
-        list_rec = []
-        for recipe in recipes:
-            encoded_string = base64.b64encode(recipe.image.read())
-            code_image = 'data:image/jpeg;base64,' + encoded_string.decode()
-            list_rec.append({
-                "id": recipe.id,
-                "name": recipe.name,
-                "image": code_image,
-                "cooking_time": recipe.cooking_time
-            })
-        return list_rec[:3]
+        if limit:
+            recipes = recipes.all()[:int(limit)]
+        return RecipeLiteSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         """Функция подсчета числа рецептов автора"""

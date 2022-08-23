@@ -100,9 +100,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         ing.ingredient.measurement_unit
                     ]
         shop_string = (
-            f'FoodGram\nВыбрано рецептов: {n_rec}\
-            \n-------------------\nСписок покупок:'
+            f'FoodGram\nВыбрано рецептов: {n_rec}\n\
+            \n-------------------\nСписок покупок:\n'
         )
         for key, value in shop_dict.items():
-            shop_string += f'\n{key} ({value[1]}) - {str(value[0])}'
+            shop_string += f'\n{key} ({value[1]}) - {str(value[0])}\n'
         return HttpResponse(shop_string, content_type='text/plain')
