@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as dfilters
@@ -5,6 +7,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from users.models import User
+from users.serializers import RecipeLiteSerializer
 
 from .filters import IngredientFilter, RecipeFilter
 from .mixin import CustomGetRetrieveClass
@@ -35,13 +38,8 @@ def add_del_metod(request, pk, instmodel):
     recipe = get_object_or_404(Recipe, pk=pk)
     if str(request.method) == 'POST':
         instmodel.objects.get_or_create(user=user, recipe=recipe)
-        recipe_responce = {
-            "id": recipe.id,
-            "name": recipe.name,
-            "image": str(recipe.image),
-            "cooking_time": recipe.cooking_time
-        }
-        return Response(recipe_responce, status=status.HTTP_201_CREATED)
+        recipe_serializer = RecipeLiteSerializer(recipe)
+        return Response(recipe_serializer.data, status=status.HTTP_201_CREATED)
     instance = get_object_or_404(instmodel, user=user, recipe=recipe)
     instance.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
@@ -99,10 +97,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         ing.amount,
                         ing.ingredient.measurement_unit
                     ]
+        now = datetime.datetime.now()
+        now = now.strftime("%d-%m-%Y")
         shop_string = (
-            f'FoodGram\nВыбрано рецептов: {n_rec}\n\
-            \n-------------------\nСписок покупок:\n'
+            f'FoodGram\nВыбрано рецептов: {n_rec}\
+            \n-------------------\n{now}\
+            \nСписок покупок:\
+            \n-------------------'
         )
         for key, value in shop_dict.items():
-            shop_string += f'\n{key} ({value[1]}) - {str(value[0])}\n'
+            shop_string += f'\n{key} ({value[1]}) - {str(value[0])}'
         return HttpResponse(shop_string, content_type='text/plain')
